@@ -48,6 +48,7 @@ using Underline = DocumentFormat.OpenXml.Spreadsheet.Underline;
 using VerticalTextAlignment = DocumentFormat.OpenXml.Spreadsheet.VerticalTextAlignment;
 using Vml = DocumentFormat.OpenXml.Vml;
 using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
+using XLS2010 = DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace ClosedXML.Excel
 {
@@ -2286,6 +2287,7 @@ namespace ClosedXML.Excel
                 Name = pt.Name,
                 CacheId = cacheId,
                 DataCaption = "Values",
+                UpdatedVersion = 5,
                 MergeItem = OpenXmlHelper.GetBooleanValue(pt.MergeAndCenterWithLabels, false),
                 Indent = Convert.ToUInt32(pt.RowLabelIndent),
                 PageOverThenDown = (pt.FilterAreaOrder == XLFilterAreaOrder.OverThenDown),
@@ -2772,7 +2774,6 @@ namespace ClosedXML.Excel
                     Name = value.CustomName,
                     Field = (UInt32)(sourceColumn.ColumnNumber() - pt.SourceRange.RangeAddress.FirstAddress.ColumnNumber),
                     Subtotal = value.SummaryFormula.ToOpenXml(),
-                    ShowDataAs = value.Calculation.ToOpenXml(),
                     NumberFormatId = numberFormatId
                 };
 
@@ -2803,6 +2804,33 @@ namespace ClosedXML.Excel
                     df.BaseItem = 1048829U;
                 else if (df.BaseItem == null || !df.BaseItem.HasValue)
                     df.BaseItem = 0U;
+
+                if (value.Calculation <= XLPivotCalculation.Index)
+                {
+                    df.ShowDataAs = value.Calculation.ToOpenXml();
+                }
+                else
+                {
+                    #region Excel 2010 Features
+                    if (value.Calculation > XLPivotCalculation.Index)
+                    {
+                        var dataFieldExtensionList = new DataFieldExtensionList();
+
+                        var dataFieldExtension = new DataFieldExtension
+                        { Uri = "{E15A36E0-9728-4e99-A89B-3F7291B0FE68}" };
+                        dataFieldExtension.AddNamespaceDeclaration("x14",
+                            "http://schemas.microsoft.com/office/spreadsheetml/2009/9/main");
+
+                        var df2 = new XLS2010.DataField
+                        { PivotShowAs = value.Calculation.ToOpenXml2010() };
+
+                        dataFieldExtension.AppendChild(df2);
+                        dataFieldExtensionList.AppendChild(dataFieldExtension);
+                        df.AppendChild(dataFieldExtensionList);
+                    }
+
+                    #endregion
+                }
 
                 dataFields.AppendChild(df);
             }

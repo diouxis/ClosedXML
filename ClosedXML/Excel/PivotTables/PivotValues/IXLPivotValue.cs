@@ -30,7 +30,10 @@ namespace ClosedXML.Excel
         PercentageOfRow,
         PercentageOfColumn,
         PercentageOfTotal,
-        Index
+        Index,
+        PercentageOfParent,
+        PercentageOfParentRow,
+        PercentageOfParentColumn
     }
     public enum XLPivotCalculationItem
     {

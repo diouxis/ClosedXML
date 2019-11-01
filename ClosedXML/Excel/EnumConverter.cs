@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using System;
 using Vml = DocumentFormat.OpenXml.Vml;
 using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
+using XLS2010 = DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace ClosedXML.Excel
 {
@@ -570,6 +571,21 @@ namespace ClosedXML.Excel
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(value), "Not implemented value!");
+            }
+        }
+
+        public static XLS2010.PivotShowAsValues ToOpenXml2010(this XLPivotCalculation value)
+        {
+            switch (value)
+            {
+                case XLPivotCalculation.PercentageOfParent: return XLS2010.PivotShowAsValues.PercentOfParent;
+                case XLPivotCalculation.PercentageOfParentRow: return XLS2010.PivotShowAsValues.PercentOfParentRow;
+                case XLPivotCalculation.PercentageOfColumn: return XLS2010.PivotShowAsValues.PercentOfParentColumn;
+
+                #region default
+                default:
+                    throw new ApplicationException("Not implemented value!");
+                    #endregion
             }
         }
 
